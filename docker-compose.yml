@@ -1,0 +1,23 @@
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: chatspace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chatspace
+      POSTGRES_PASSWORD: chatspace_dev_password
+      POSTGRES_DB: chatspace
+    ports:
+      - "5432:5432"
+    volumes:
+      - chatspace-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatspace -d chatspace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+
+  chatspace-postgres-data:
