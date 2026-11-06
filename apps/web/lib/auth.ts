@@ -1,8 +1,16 @@
 
-import type { NextAuthOptions } from "next-auth";
+import type { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@chatspace/db";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -48,6 +56,21 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: "/login",
+  },
+
+  callbacks: {
+    jwt({ token, user }) {
+      if (user?.id) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
   },
 
   secret: process.env.NEXTAUTH_SECRET,
